@@ -22,17 +22,16 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.SettingsClient;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.sinzorebenjamin.locationrealtimetracker.R;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
-    int LOCATION_REQUEST_CODE = 10001;
+    private final int LOCATION_REQUEST_CODE = 10001;
 
     FusedLocationProviderClient fusedLocationProviderClient;
-    LocationRequest locationRequest;
+    private LocationRequest locationRequest;
 
     LocationCallback locationCallback = new LocationCallback() {
         @Override
@@ -40,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
             if (locationResult == null) {
                 return;
             }
-            for(Location location: locationResult.getLocations()) {
+            for (Location location : locationResult.getLocations()) {
                 Log.d(TAG, "onLocationResult: " + location.toString());
             }
         }
@@ -82,31 +81,34 @@ public class MainActivity extends AppCompatActivity {
         SettingsClient client = LocationServices.getSettingsClient(this);
 
         Task<LocationSettingsResponse> locationSettingsResponseTask = client.checkLocationSettings(request);
-        locationSettingsResponseTask.addOnSuccessListener(new OnSuccessListener<LocationSettingsResponse>() {
-            @Override
-            public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
-                //Settings of device are satisfied and we can start location updates
-                startLocationUpdates();
-            }
+        locationSettingsResponseTask.addOnSuccessListener(locationSettingsResponse -> {
+            //Settings of device are satisfied and we can start location updates
+            startLocationUpdates();
         });
-        locationSettingsResponseTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                if (e instanceof ResolvableApiException) {
-                    ResolvableApiException apiException = (ResolvableApiException) e;
-                    try {
-                        apiException.startResolutionForResult(MainActivity.this, 1001);
-                    } catch (IntentSender.SendIntentException ex) {
-                        ex.printStackTrace();
-                    }
+        locationSettingsResponseTask.addOnFailureListener(e -> {
+            if (e instanceof ResolvableApiException) {
+                ResolvableApiException apiException = (ResolvableApiException) e;
+                try {
+                    apiException.startResolutionForResult(MainActivity.this, 1001);
+                } catch (IntentSender.SendIntentException ex) {
+                    ex.printStackTrace();
                 }
             }
         });
     }
 
 
-
     private void startLocationUpdates() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
         fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
     }
 
@@ -115,26 +117,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getLastLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
         Task<Location> locationTask = fusedLocationProviderClient.getLastLocation();
-        locationTask.addOnSuccessListener(new OnSuccessListener<Location>() {
-            @Override
-            public void onSuccess(Location location) {
-                if (location != null) {
-                    //We have a location
-                    Log.d(TAG, "onSuccess: " + location.toString());
-                    Log.d(TAG, "onSuccess: " + location.getLatitude());
-                    Log.d(TAG, "onSuccess: " + location.getLongitude());
-                } else  {
-                    Log.d(TAG, "onSuccess: Location was null...");
-                }
+        locationTask.addOnSuccessListener(location -> {
+            if (location != null) {
+                //We have a location
+                Log.d(TAG, "onSuccess: " + location);
+                Log.d(TAG, "onSuccess: " + location.getLatitude());
+                Log.d(TAG, "onSuccess: " + location.getLongitude());
+            } else  {
+                Log.d(TAG, "onSuccess: Location was null...");
             }
         });
-        locationTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.e(TAG, "onFailure: " + e.getLocalizedMessage() );
-            }
-        });
+        locationTask.addOnFailureListener(e -> Log.e(TAG, "onFailure: " + e.getLocalizedMessage() ));
     }
 
     private void askLocationPermission() {

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorAccent">#03DAC5</color>
+    <color name="colorPrimary">#6200EE</color>
+    <color name="colorPrimaryDark">#3700B3</color>
+    <string name="app_name">LocationTutorial</string>
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyDmuqDGtrltWACyjhwZi4I4SncizcPuEGo</string>
+    <string name="title_activity_maps">Map</string>
+    <style name="AppTheme" parent="Theme.Material3.Light.NoActionBar">
+        
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+</resources>
